@@ -131,21 +131,6 @@
       background: #f0f0f0;
     }
 
-    /* iFrame Styling */
-    .iframe-container {
-      width: 80%;
-      height: 500px;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      margin-top: 20px;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
     /* Lade-Spinner */
     .loader {
       border: 8px solid #f3f3f3;
@@ -236,74 +221,85 @@
   <p>Schön, dass du wieder da bist. Entdecke neue Inhalte oder verwalte deine Einstellungen!</p>
   <button onclick="openPage()">Weiter zu deiner Seite ➡️</button>
 
-  <!-- Neue App-Overlays (iFrames) -->
+  <!-- Neue App-Overlays -->
   <div class="app-links">
-    <div class="app-card">
+    <div class="app-card" onclick="window.open('https://onedrive.live.com/', '_blank')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/OneDrive_Icon.svg" alt="OneDrive">
       <span>OneDrive</span>
-      <div class="iframe-container">
-        <iframe src="https://onedrive.live.com" title="OneDrive"></iframe>
-      </div>
     </div>
-    <div class="app-card">
+    <div class="app-card" onclick="window.open('https://drive.google.com/', '_blank')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/1/1f/Google_Drive_logo.png" alt="Google Drive">
       <span>Google Drive</span>
-      <div class="iframe-container">
-        <iframe src="https://drive.google.com" title="Google Drive"></iframe>
-      </div>
     </div>
-    <div class="app-card">
+    <div class="app-card" onclick="openInIframe('https://outlook.live.com/')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Outlook.com_icon.svg" alt="Outlook">
       <span>Outlook</span>
-      <div class="iframe-container">
-        <iframe src="https://outlook.live.com" title="Outlook"></iframe>
-      </div>
     </div>
-    <div class="app-card">
+    <div class="app-card" onclick="window.open('https://www.dropbox.com/', '_blank')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Dropbox_Icon.svg" alt="Dropbox">
       <span>Dropbox</span>
-      <div class="iframe-container">
-        <iframe src="https://www.dropbox.com" title="Dropbox"></iframe>
-      </div>
     </div>
   </div>
 </div>
 
+<!-- iframe-Container -->
+<div id="iframeContainer" style="display:none;">
+  <iframe id="iframe" width="100%" height="600px"></iframe>
+</div>
+
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
 
 <script>
-  // Firebase-Initialisierung
-  var firebaseConfig = {
-      apiKey: "AIzaSyDBF01kd0JJ7lCQ4cLH5mtNBJPGDIZSjNU",
-  authDomain: "online-189a1.firebaseapp.com",
-  projectId: "online-189a1",
-  storageBucket: "online-189a1.firebasestorage.app",
-  messagingSenderId: "614444215209",
-  appId: "1:614444215209:web:ed0f2b0d96d1a3e88ab2b8",
-  measurementId: "G-L4FMX6RE0V"
+  const firebaseConfig = {
+    apiKey: "AIzaSyDBF01kd0JJ7lCQ4cLH5mtNBJPGDIZSjNU",
+    authDomain: "online-189a1.firebaseapp.com",
+    projectId: "online-189a1",
+    storageBucket: "online-189a1.appspot.com",
+    messagingSenderId: "614444215209",
+    appId: "1:614444215209:web:ed0f2b0d96d1a3e88ab2b8",
+    measurementId: "G-L4FMX6RE0V"
   };
-  firebase.initializeApp(firebaseConfig);
 
-  // Lade-Spinner ausblenden
-  window.onload = function() {
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("navbar").style.display = "flex";
-    document.getElementById("mainContent").style.display = "block";
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  auth.onAuthStateChanged(user => {
+    const loader = document.getElementById('loader');
+    const navbar = document.getElementById('navbar');
+    const mainContent = document.getElementById('mainContent');
+
+    if (user) {
+      loader.style.display = 'none';
+      navbar.style.display = 'flex';
+      mainContent.style.display = 'flex';
+    } else {
+      window.location.href = "index.html";
+    }
+  });
+
+  function logout() {
+    const overlay = document.getElementById('logoutOverlay');
+    overlay.classList.add('show');
+    
+    setTimeout(() => {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    }, 2500);
   }
 
-  // Logout-Funktion
-  function logout() {
-    document.getElementById("logoutOverlay").classList.add("show");
-    setTimeout(() => {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "/login";
-      }).catch((error) => {
-        alert(error.message);
-      });
-    }, 1000);
+  function openPage() {
+    window.location.href = "deineseite.html"; // Hier wird später die neue Seite geöffnet
+  }
+
+  function openInIframe(url) {
+    const iframe = document.getElementById('iframe');
+    const iframeContainer = document.getElementById('iframeContainer');
+    
+    iframe.src = url;
+    iframeContainer.style.display = 'block'; // Anzeigen des iFrames
   }
 </script>
 
