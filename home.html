@@ -5,35 +5,120 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;600&display=swap" rel="stylesheet">
+
   <style>
-    body {
+    * {
       margin: 0;
       padding: 0;
-      display: grid;
-      height: 100vh;
-      place-items: center;
-      background: linear-gradient(135deg, #ADEDD5, #FBEE97);
+      box-sizing: border-box;
       font-family: 'Raleway', sans-serif;
     }
-    h1 {
-      font-size: 40px;
-      color: #333;
-      animation: fadeIn 1s ease forwards;
-      opacity: 0;
+    body, html {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(135deg, #ADEDD5, #FBEE97);
+      display: flex;
+      flex-direction: column;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 25px;
-      font-size: 18px;
+
+    /* Menüleiste */
+    .navbar {
+      width: 100%;
+      background: white;
+      padding: 15px 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .navbar h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    .navbar .nav-buttons button {
       background: #12e8f0;
-      color: white;
       border: none;
+      padding: 10px 20px;
+      margin-left: 15px;
+      color: white;
+      font-size: 16px;
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.3s ease;
     }
-    button:hover {
+    .navbar .nav-buttons button:hover {
       background: #0cb5be;
+    }
+
+    /* Seite Inhalt */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .main-content h2 {
+      font-size: 40px;
+      color: #333;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    /* Lade-Animation */
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #12e8f0;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      animation: spin 1s linear infinite;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Logout-Overlay */
+    .logout-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.5s ease;
+      z-index: 10;
+    }
+    .logout-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .logout-overlay h1 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .logout-overlay .loader {
+      width: 50px;
+      height: 50px;
+      border-width: 6px;
+    }
+
+    /* Animationen */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     @keyframes fadeIn {
       to {
@@ -44,15 +129,35 @@
 </head>
 <body>
 
-<h1>Willkommen auf deiner Startseite!</h1>
-<button onclick="logout()">Logout</button>
+<!-- Lade-Spinner -->
+<div class="loader" id="loader"></div>
+
+<!-- Logout-Overlay -->
+<div class="logout-overlay" id="logoutOverlay">
+  <h1>Abmelden...</h1>
+  <div class="loader"></div>
+</div>
+
+<!-- Navigation -->
+<div class="navbar" id="navbar" style="display: none;">
+  <h1>Deine Startseite</h1>
+  <div class="nav-buttons">
+    <button onclick="openPage()">Seite öffnen</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- Hauptinhalt -->
+<div class="main-content" id="mainContent" style="display: none;">
+  <h2>Willkommen zurück! 👋</h2>
+</div>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
 
 <script>
-  // Deine Firebase Konfiguration - gleiche wie auf der Login-Seite!
+  // Deine Firebase Konfiguration
   const firebaseConfig = {
       apiKey: "AIzaSyDBF01kd0JJ7lCQ4cLH5mtNBJPGDIZSjNU",
   authDomain: "online-189a1.firebaseapp.com",
@@ -66,19 +171,36 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  // Wichtiger Teil: Überprüfen, ob jemand eingeloggt ist
   auth.onAuthStateChanged(user => {
-    if (!user) {
-      // Wenn niemand eingeloggt → zurück zum Login
+    const loader = document.getElementById('loader');
+    const navbar = document.getElementById('navbar');
+    const mainContent = document.getElementById('mainContent');
+
+    if (user) {
+      // Eingeloggt
+      loader.style.display = 'none';
+      navbar.style.display = 'flex';
+      mainContent.style.display = 'flex';
+    } else {
+      // Nicht eingeloggt
       window.location.href = "index.html";
     }
   });
 
   function logout() {
-    auth.signOut()
-      .then(() => {
+    const overlay = document.getElementById('logoutOverlay');
+    overlay.classList.add('show');
+    
+    setTimeout(() => {
+      auth.signOut().then(() => {
         window.location.href = "index.html";
       });
+    }, 2000); // 2 Sekunden animiertes Overlay
+  }
+
+  function openPage() {
+    alert("Hier könntest du z.B. eine Unterseite öffnen 🚀");
+    // window.location.href = "deineseite.html"; // Beispiel
   }
 </script>
 
