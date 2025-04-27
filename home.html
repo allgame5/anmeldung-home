@@ -20,6 +20,7 @@
       background: linear-gradient(135deg, #ADEDD5, #FBEE97);
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     /* Menüleiste */
@@ -31,27 +32,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      z-index: 5;
+      position: relative;
     }
     .navbar h1 {
       font-size: 24px;
       color: #333;
     }
-    .navbar .nav-buttons button {
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .nav-buttons button {
       background: #12e8f0;
       border: none;
       padding: 10px 20px;
-      margin-left: 15px;
       color: white;
       font-size: 16px;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
     }
-    .navbar .nav-buttons button:hover {
+    .nav-buttons button:hover {
       background: #0cb5be;
+      transform: translateY(-2px);
     }
 
-    /* Seite Inhalt */
+    /* Hauptinhalt */
     .main-content {
       flex: 1;
       display: flex;
@@ -59,17 +66,35 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 20px;
+      padding: 30px;
+      animation: fadeIn 1s ease forwards;
     }
     .main-content h2 {
       font-size: 40px;
       color: #333;
       margin-bottom: 20px;
-      opacity: 0;
-      animation: fadeIn 1s ease forwards;
+    }
+    .main-content p {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 30px;
+    }
+    .main-content button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #12e8f0;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .main-content button:hover {
+      background: #0cb5be;
+      transform: scale(1.05);
     }
 
-    /* Lade-Animation */
+    /* Lade-Spinner */
     .loader {
       border: 8px solid #f3f3f3;
       border-top: 8px solid #12e8f0;
@@ -81,6 +106,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      z-index: 20;
     }
 
     /* Logout-Overlay */
@@ -90,15 +116,15 @@
       left: 0;
       height: 100%;
       width: 100%;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.95);
       display: flex;
       justify-content: center;
       align-items: center;
       flex-direction: column;
       opacity: 0;
       pointer-events: none;
-      transition: all 0.5s ease;
-      z-index: 10;
+      transition: opacity 0.5s ease;
+      z-index: 30;
     }
     .logout-overlay.show {
       opacity: 1;
@@ -108,11 +134,16 @@
       font-size: 32px;
       color: #333;
       margin-bottom: 20px;
+      animation: textPop 1s infinite alternate;
     }
     .logout-overlay .loader {
       width: 50px;
       height: 50px;
       border-width: 6px;
+    }
+    @keyframes textPop {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
     }
 
     /* Animationen */
@@ -140,7 +171,7 @@
 
 <!-- Navigation -->
 <div class="navbar" id="navbar" style="display: none;">
-  <h1>Deine Startseite</h1>
+  <h1>Willkommen 🏠</h1>
   <div class="nav-buttons">
     <button onclick="openPage()">Seite öffnen</button>
     <button onclick="logout()">Logout</button>
@@ -149,7 +180,9 @@
 
 <!-- Hauptinhalt -->
 <div class="main-content" id="mainContent" style="display: none;">
-  <h2>Willkommen zurück! 👋</h2>
+  <h2>Willkommen zurück, lieber Nutzer! 👋</h2>
+  <p>Schön, dass du wieder da bist. Entdecke neue Inhalte oder verwalte deine Einstellungen!</p>
+  <button onclick="openPage()">Weiter zu deiner Seite ➡️</button>
 </div>
 
 <!-- Firebase -->
@@ -157,15 +190,14 @@
 <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
 
 <script>
-  // Deine Firebase Konfiguration
   const firebaseConfig = {
-      apiKey: "AIzaSyDBF01kd0JJ7lCQ4cLH5mtNBJPGDIZSjNU",
-  authDomain: "online-189a1.firebaseapp.com",
-  projectId: "online-189a1",
-  storageBucket: "online-189a1.firebasestorage.app",
-  messagingSenderId: "614444215209",
-  appId: "1:614444215209:web:ed0f2b0d96d1a3e88ab2b8",
-  measurementId: "G-L4FMX6RE0V"
+    apiKey: "AIzaSyDBF01kd0JJ7lCQ4cLH5mtNBJPGDIZSjNU",
+    authDomain: "online-189a1.firebaseapp.com",
+    projectId: "online-189a1",
+    storageBucket: "online-189a1.appspot.com",
+    messagingSenderId: "614444215209",
+    appId: "1:614444215209:web:ed0f2b0d96d1a3e88ab2b8",
+    measurementId: "G-L4FMX6RE0V"
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -177,12 +209,10 @@
     const mainContent = document.getElementById('mainContent');
 
     if (user) {
-      // Eingeloggt
       loader.style.display = 'none';
       navbar.style.display = 'flex';
       mainContent.style.display = 'flex';
     } else {
-      // Nicht eingeloggt
       window.location.href = "index.html";
     }
   });
@@ -195,12 +225,11 @@
       auth.signOut().then(() => {
         window.location.href = "index.html";
       });
-    }, 2000); // 2 Sekunden animiertes Overlay
+    }, 2500);
   }
 
   function openPage() {
-    alert("Hier könntest du z.B. eine Unterseite öffnen 🚀");
-    // window.location.href = "deineseite.html"; // Beispiel
+    window.location.href = "deineseite.html"; // Hier wird später die neue Seite geöffnet
   }
 </script>
 
