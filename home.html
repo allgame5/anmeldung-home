@@ -131,63 +131,19 @@
       background: #f0f0f0;
     }
 
-    /* Lade-Spinner */
-    .loader {
-      border: 8px solid #f3f3f3;
-      border-top: 8px solid #12e8f0;
-      border-radius: 50%;
-      width: 70px;
-      height: 70px;
-      animation: spin 1s linear infinite;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 20;
-    }
-
-    /* Logout-Overlay */
-    .logout-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
+    /* iframe */
+    #iframeContainer {
       width: 100%;
-      background: rgba(255, 255, 255, 0.95);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.5s ease;
-      z-index: 30;
+      height: 600px;
+      margin-top: 30px;
     }
-    .logout-overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .logout-overlay h1 {
-      font-size: 32px;
-      color: #333;
-      margin-bottom: 20px;
-      animation: textPop 1s infinite alternate;
-    }
-    .logout-overlay .loader {
-      width: 50px;
-      height: 50px;
-      border-width: 6px;
-    }
-    @keyframes textPop {
-      0% { transform: scale(1); }
-      100% { transform: scale(1.05); }
+    #iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
     /* Animationen */
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
     @keyframes fadeIn {
       to {
         opacity: 1;
@@ -197,54 +153,40 @@
 </head>
 <body>
 
-<!-- Lade-Spinner -->
-<div class="loader" id="loader"></div>
-
-<!-- Logout-Overlay -->
-<div class="logout-overlay" id="logoutOverlay">
-  <h1>Abmelden...</h1>
-  <div class="loader"></div>
-</div>
-
 <!-- Navigation -->
 <div class="navbar" id="navbar" style="display: none;">
   <h1>Willkommen 🏠</h1>
-  <div class="nav-buttons">
-    <button onclick="openPage()">Seite öffnen</button>
-    <button onclick="logout()">Logout</button>
-  </div>
 </div>
 
 <!-- Hauptinhalt -->
 <div class="main-content" id="mainContent" style="display: none;">
   <h2>Willkommen zurück, lieber Nutzer! 👋</h2>
   <p>Schön, dass du wieder da bist. Entdecke neue Inhalte oder verwalte deine Einstellungen!</p>
-  <button onclick="openPage()">Weiter zu deiner Seite ➡️</button>
 
   <!-- Neue App-Overlays -->
   <div class="app-links">
-    <div class="app-card" onclick="window.open('https://onedrive.live.com/', '_blank')">
+    <div class="app-card" onclick="loadIframe('https://onedrive.live.com/')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/OneDrive_Icon.svg" alt="OneDrive">
       <span>OneDrive</span>
     </div>
-    <div class="app-card" onclick="window.open('https://drive.google.com/', '_blank')">
+    <div class="app-card" onclick="loadIframe('https://drive.google.com/')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/1/1f/Google_Drive_logo.png" alt="Google Drive">
       <span>Google Drive</span>
     </div>
-    <div class="app-card" onclick="openInIframe('https://outlook.live.com/')">
+    <div class="app-card" onclick="loadIframe('https://outlook.live.com/')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/4/45/Outlook.com_icon.svg" alt="Outlook">
       <span>Outlook</span>
     </div>
-    <div class="app-card" onclick="window.open('https://www.dropbox.com/', '_blank')">
+    <div class="app-card" onclick="loadIframe('https://www.dropbox.com/')">
       <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Dropbox_Icon.svg" alt="Dropbox">
       <span>Dropbox</span>
     </div>
   </div>
-</div>
 
-<!-- iframe-Container -->
-<div id="iframeContainer" style="display:none;">
-  <iframe id="iframe" width="100%" height="600px"></iframe>
+  <!-- iframe-Container -->
+  <div id="iframeContainer">
+    <iframe id="iframe"></iframe>
+  </div>
 </div>
 
 <!-- Firebase -->
@@ -279,6 +221,11 @@
     }
   });
 
+  function loadIframe(url) {
+    const iframe = document.getElementById('iframe');
+    iframe.src = url;
+  }
+
   function logout() {
     const overlay = document.getElementById('logoutOverlay');
     overlay.classList.add('show');
@@ -288,18 +235,6 @@
         window.location.href = "index.html";
       });
     }, 2500);
-  }
-
-  function openPage() {
-    window.location.href = "deineseite.html"; // Hier wird später die neue Seite geöffnet
-  }
-
-  function openInIframe(url) {
-    const iframe = document.getElementById('iframe');
-    const iframeContainer = document.getElementById('iframeContainer');
-    
-    iframe.src = url;
-    iframeContainer.style.display = 'block'; // Anzeigen des iFrames
   }
 </script>
 
